@@ -7,7 +7,7 @@ class STLViewer {
         this.controls = null;
         this.model = null;
         this.isWireframe = false;
-        this.initialCameraPosition = { x: 0, y: 0, z: 5 };
+        this.initialCameraPosition = { x: 0, y: 0, z: 2 };
         
         this.init();
         this.setupEventListeners();
@@ -79,8 +79,8 @@ class STLViewer {
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
         this.controls.screenSpacePanning = false;
-        this.controls.minDistance = 1;
-        this.controls.maxDistance = 20;
+        this.controls.minDistance = 0.5;
+        this.controls.maxDistance = 10;
         this.controls.maxPolarAngle = Math.PI;
         
         // Mobile-friendly settings
@@ -121,7 +121,7 @@ class STLViewer {
                 // Scale model to fit view
                 const size = geometry.boundingBox.getSize(new THREE.Vector3());
                 const maxDim = Math.max(size.x, size.y, size.z);
-                const scale = 3 / maxDim;
+                const scale = 5 / maxDim; // Increased scale to make model larger
                 this.model.scale.setScalar(scale);
                 
                 // Add shadows
