@@ -81,8 +81,8 @@ class STLViewer {
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
         this.controls.screenSpacePanning = false;
-        this.controls.minDistance = 1;
-        this.controls.maxDistance = 10;
+        this.controls.minDistance = 0.5;
+        this.controls.maxDistance = 20;
         this.controls.maxPolarAngle = Math.PI;
         
         // Mobile-friendly settings
@@ -91,7 +91,7 @@ class STLViewer {
         this.controls.enableRotate = true;
         
         // Enhanced mobile controls
-        this.controls.zoomSpeed = 1.2;
+        this.controls.zoomSpeed = 1.5;
         this.controls.rotateSpeed = 1.0;
         this.controls.panSpeed = 1.0;
         
