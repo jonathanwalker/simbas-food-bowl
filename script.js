@@ -7,7 +7,7 @@ class STLViewer {
         this.controls = null;
         this.model = null;
         this.isWireframe = false;
-        this.initialCameraPosition = { x: 0, y: 0, z: 2 };
+        this.initialCameraPosition = { x: 0, y: 0, z: 1.5 };
         
         this.init();
         this.setupEventListeners();
@@ -38,7 +38,9 @@ class STLViewer {
             alpha: true
         });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        // Optimize for mobile performance
+        const pixelRatio = window.devicePixelRatio || 1;
+        this.renderer.setPixelRatio(Math.min(pixelRatio, 2));
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -79,8 +81,8 @@ class STLViewer {
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
         this.controls.screenSpacePanning = false;
-        this.controls.minDistance = 0.5;
-        this.controls.maxDistance = 10;
+        this.controls.minDistance = 0.3;
+        this.controls.maxDistance = 5;
         this.controls.maxPolarAngle = Math.PI;
         
         // Mobile-friendly settings
@@ -88,10 +90,14 @@ class STLViewer {
         this.controls.enableZoom = true;
         this.controls.enableRotate = true;
         
-        // Smooth zoom
-        this.controls.zoomSpeed = 0.8;
-        this.controls.rotateSpeed = 0.8;
-        this.controls.panSpeed = 0.8;
+        // Enhanced mobile controls
+        this.controls.zoomSpeed = 1.2;
+        this.controls.rotateSpeed = 1.0;
+        this.controls.panSpeed = 1.0;
+        
+        // Better touch response
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.08;
     }
 
     loadSTLModel() {
@@ -118,11 +124,14 @@ class STLViewer {
                 const center = geometry.boundingBox.getCenter(new THREE.Vector3());
                 this.model.position.sub(center);
                 
-                // Scale model to fit view
+                // Scale model to fit view - make it fill most of the screen
                 const size = geometry.boundingBox.getSize(new THREE.Vector3());
                 const maxDim = Math.max(size.x, size.y, size.z);
-                const scale = 5 / maxDim; // Increased scale to make model larger
+                const scale = 8 / maxDim; // Much larger scale to fill the view
                 this.model.scale.setScalar(scale);
+                
+                // Fine-tune position for better centering
+                this.model.position.y += 0.1; // Slight upward adjustment
                 
                 // Add shadows
                 this.model.castShadow = true;
@@ -166,12 +175,21 @@ class STLViewer {
             this.toggleInfoPanel();
         });
 
-        // Double tap to reset (mobile)
+        // Enhanced mobile touch handling
         let lastTap = 0;
+        let touchStartTime = 0;
+        
+        this.renderer.domElement.addEventListener('touchstart', (event) => {
+            touchStartTime = new Date().getTime();
+        });
+        
         this.renderer.domElement.addEventListener('touchend', (event) => {
             const currentTime = new Date().getTime();
             const tapLength = currentTime - lastTap;
-            if (tapLength < 500 && tapLength > 0) {
+            const touchDuration = currentTime - touchStartTime;
+            
+            // Double tap to reset (with better timing)
+            if (tapLength < 600 && tapLength > 0 && touchDuration < 200) {
                 this.resetView();
             }
             lastTap = currentTime;
@@ -221,6 +239,10 @@ class STLViewer {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+        
+        // Re-optimize pixel ratio for mobile
+        const pixelRatio = window.devicePixelRatio || 1;
+        this.renderer.setPixelRatio(Math.min(pixelRatio, 2));
     }
 
     animate() {
