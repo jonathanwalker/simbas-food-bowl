@@ -7,7 +7,7 @@ class STLViewer {
         this.controls = null;
         this.model = null;
         this.isWireframe = false;
-        this.initialCameraPosition = { x: 0, y: 0, z: 1.5 };
+        this.initialCameraPosition = { x: 0, y: 0, z: 3 };
         
         this.init();
         this.setupEventListeners();
@@ -81,8 +81,8 @@ class STLViewer {
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
         this.controls.screenSpacePanning = false;
-        this.controls.minDistance = 0.3;
-        this.controls.maxDistance = 5;
+        this.controls.minDistance = 1;
+        this.controls.maxDistance = 10;
         this.controls.maxPolarAngle = Math.PI;
         
         // Mobile-friendly settings
@@ -127,17 +127,22 @@ class STLViewer {
                 // Scale model to fit view - make it fill most of the screen
                 const size = geometry.boundingBox.getSize(new THREE.Vector3());
                 const maxDim = Math.max(size.x, size.y, size.z);
-                const scale = 8 / maxDim; // Much larger scale to fill the view
+                const scale = 6 / maxDim; // Adjusted scale for better fit
                 this.model.scale.setScalar(scale);
                 
-                // Fine-tune position for better centering
-                this.model.position.y += 0.1; // Slight upward adjustment
+                // Ensure model is at origin and visible
+                this.model.position.set(0, 0, 0);
+                
+                console.log('Model loaded - Size:', size, 'Scale:', scale, 'Position:', this.model.position);
                 
                 // Add shadows
                 this.model.castShadow = true;
                 this.model.receiveShadow = true;
                 
                 this.scene.add(this.model);
+                
+                // Ensure camera is looking at the model
+                this.camera.lookAt(0, 0, 0);
                 
                 // Hide loading screen
                 document.getElementById('loading').style.display = 'none';
@@ -146,6 +151,8 @@ class STLViewer {
                 document.getElementById('info-panel').style.display = 'block';
                 
                 console.log('STL model loaded successfully');
+                console.log('Camera position:', this.camera.position);
+                console.log('Camera target:', this.controls.target);
             },
             (progress) => {
                 const percentComplete = (progress.loaded / progress.total) * 100;
@@ -210,12 +217,20 @@ class STLViewer {
 
     resetView() {
         if (this.controls) {
+            // Reset camera to initial position
             this.camera.position.set(
                 this.initialCameraPosition.x,
                 this.initialCameraPosition.y,
                 this.initialCameraPosition.z
             );
+            
+            // Look at the center (where the model should be)
+            this.camera.lookAt(0, 0, 0);
+            
+            // Reset controls
             this.controls.reset();
+            
+            console.log('View reset - Camera position:', this.camera.position);
         }
     }
 
